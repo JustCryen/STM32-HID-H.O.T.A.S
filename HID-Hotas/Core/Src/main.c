@@ -57,6 +57,21 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 extern USBD_HandleTypeDef hUsbDeviceFS;
+
+int map(uint16_t probed, uint16_t correction)
+{
+uint16_t result;
+  if (probed < correction)
+  {
+    result = (((probed - 1056)* 2048) / (correction - 1056)) / 16;
+  }
+  else
+  {
+    result = ((((probed - correction)* 2048) / (4095 - correction)) + 2048) / 16;
+  }
+return result;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -66,7 +81,9 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-        uint8_t Joystick_buffer[5];
+  uint8_t Joystick_buffer[5];
+  uint16_t x_correction;
+  uint16_t y_correction;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -97,6 +114,10 @@ int main(void)
   Joystick_buffer[2] = 0; // 3.8 przyciskow
   Joystick_buffer[3] = 0; // X
   Joystick_buffer[4] = 0; // Y
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
+  HAL_Delay(1000);
+  x_correction = ADC_buffer[0];
+  y_correction = ADC_buffer[1];  
 
   /* USER CODE END 2 */
 
@@ -112,9 +133,9 @@ int main(void)
 
       HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
       Joystick_buffer[0] = !HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
-      //Joystick_buffer[0] = 1;
-      Joystick_buffer[3] = ADC_buffer[0] / 16;
-      Joystick_buffer[4] = ADC_buffer[1] / 16;
+
+      Joystick_buffer[3] = map(ADC_buffer[0], x_correction);
+      Joystick_buffer[4] = map(ADC_buffer[1], y_correction);
       USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 5);
       HAL_Delay(50);
 
