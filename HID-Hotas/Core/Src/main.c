@@ -46,8 +46,6 @@
 
 /* USER CODE BEGIN PV */
 uint16_t ADC_buffer[2];
-uint16_t x_axis;
-uint16_t y_axis;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,12 +92,11 @@ int main(void)
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_ADC_Start_DMA(&hadc1, ADC_buffer, 2);
-  Joystick_buffer[0]=0; // 1.8 przyciskow
-  Joystick_buffer[1]=0; // 2.8 przyciskow
-  Joystick_buffer[2]=0; // 3.8 przyciskow
-  Joystick_buffer[3]=0; // X
-  Joystick_buffer[4]=0; // Y
+  Joystick_buffer[0] = 0; // 1.8 przyciskow
+  Joystick_buffer[1] = 0; // 2.8 przyciskow
+  Joystick_buffer[2] = 0; // 3.8 przyciskow
+  Joystick_buffer[3] = 0; // X
+  Joystick_buffer[4] = 0; // Y
 
   /* USER CODE END 2 */
 
@@ -112,9 +109,14 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      Joystick_buffer[0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+
+      HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
+      Joystick_buffer[0] = !HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+      //Joystick_buffer[0] = 1;
+      Joystick_buffer[3] = ADC_buffer[0] / 16;
+      Joystick_buffer[4] = ADC_buffer[1] / 16;
       USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 5);
-      HAL_Delay(100);
+      HAL_Delay(50);
 
   }
   /* USER CODE END 3 */
