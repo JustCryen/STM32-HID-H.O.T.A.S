@@ -20,12 +20,14 @@
 #include "main.h"
 #include "adc.h"
 #include "dma.h"
+#include "spi.h"
 #include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "usbd_customhid.h"
+#include "MCP23S17.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,7 +62,7 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 
 int map(uint16_t probed, uint16_t correction)
 {
-uint16_t result;
+  uint16_t result;
   if (probed < correction)
   {
     result = (((probed - 1056)* 2048) / (correction - 1056)) / 16;
@@ -69,7 +71,39 @@ uint16_t result;
   {
     result = ((((probed - correction)* 2048) / (4095 - correction)) + 2048) / 16;
   }
-return result;
+  return result;
+}
+
+void setup_MCP23S17()
+{
+   MCP23S17_write(IO_DEVICE_1, MCP_IOCONA, 0x38);      //Device Configutation
+   MCP23S17_write(IO_DEVICE_1, MCP_IOCONB, 0x38);      //Device Configutation
+   MCP23S17_write(IO_DEVICE_1, MCP_IODIRA, 0xFF);      //Set pins as inputs or outputs on side A
+   MCP23S17_write(IO_DEVICE_1, MCP_IODIRB, 0xFF);      //Set pins as inputs or outputs on side B
+   MCP23S17_write(IO_DEVICE_1, MCP_GPPUA, 0xFF);       //I/O pullup pin state on side A
+   MCP23S17_write(IO_DEVICE_1, MCP_GPPUB, 0xFF);       //I/O pullup pin state on side B
+   MCP23S17_write(IO_DEVICE_1, MCP_IPOLA, 0xFF);       //Signal polarity on side A
+   MCP23S17_write(IO_DEVICE_1, MCP_IPOLB, 0xFF);       //Signal polarity on side B
+}
+
+void MCP23S17_write(uint8_t device, uint8_t address, uint8_t value)
+{
+  uint8_t SPI_TX[3] = {device, address, value};
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(&hspi1, SPI_TX, 3, HAL_MAX_DELAY);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
+}
+
+uint8_t MCP23S17_read(uint8_t device, uint8_t address)
+{
+  device = device + 1;                                 //change device to read mode 
+  uint8_t received_data = 0;
+  uint8_t SPI_TX[2] = {device, address};
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(&hspi1, SPI_TX, 2, HAL_MAX_DELAY);
+  HAL_SPI_Receive(&hspi1, &received_data, 1, HAL_MAX_DELAY);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
+  return received_data;
 }
 
 /* USER CODE END 0 */
@@ -107,6 +141,7 @@ int main(void)
   MX_DMA_Init();
   MX_USB_DEVICE_Init();
   MX_ADC1_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
   Joystick_buffer[0] = 0; // 1.8 przyciskow
@@ -117,27 +152,27 @@ int main(void)
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
   HAL_Delay(1000);
   x_correction = ADC_buffer[0];
-  y_correction = ADC_buffer[1];  
-
+  y_correction = ADC_buffer[1];
+  setup_MCP23S17();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      //Joystick_buffer[0]=HAL_GPIO_;
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
-      HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
-      Joystick_buffer[0] = !HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
-
-      Joystick_buffer[3] = map(ADC_buffer[0], x_correction);
-      Joystick_buffer[4] = map(ADC_buffer[1], y_correction);
-      USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 5);
-      HAL_Delay(50);
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
+    //Joystick_buffer[0] = !HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+    Joystick_buffer[0] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
+    Joystick_buffer[1] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
+    
+    Joystick_buffer[3] = map(ADC_buffer[0], x_correction);
+    Joystick_buffer[4] = map(ADC_buffer[1], y_correction);
+    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 5);
+    HAL_Delay(50);
 
   }
   /* USER CODE END 3 */

@@ -66,7 +66,7 @@
 #define USBD_LANGID_STRING     1033
 #define USBD_MANUFACTURER_STRING     "STMicroelectronics"
 #define USBD_PID_FS     22362
-#define USBD_PRODUCT_STRING_FS     "STM32F411CEU-6 H.O.T.A.S."
+#define USBD_PRODUCT_STRING_FS     "H.O.T.A.S."
 #define USBD_CONFIGURATION_STRING_FS     "Custom HID Config"
 #define USBD_INTERFACE_STRING_FS     "Custom HID Interface"
 
