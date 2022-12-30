@@ -98,9 +98,9 @@ void setup_MCP23S17()
 void MCP23S17_write(uint8_t device, uint8_t address, uint8_t value)
 {
   uint8_t SPI_TX[3] = {device, address, value};
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
-  HAL_SPI_Transmit(&hspi1, SPI_TX, 3, HAL_MAX_DELAY);
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(&hspi3, SPI_TX, 3, HAL_MAX_DELAY);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
 }
 
 uint8_t MCP23S17_read(uint8_t device, uint8_t address)
@@ -109,10 +109,10 @@ uint8_t MCP23S17_read(uint8_t device, uint8_t address)
   //device |= 0x1;                                       //change device to read mode 
   uint8_t received_data = 0;
   uint8_t SPI_TX[2] = {device, address};
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
-  HAL_SPI_Transmit(&hspi1, SPI_TX, 2, HAL_MAX_DELAY);
-  HAL_SPI_Receive(&hspi1, &received_data, 1, HAL_MAX_DELAY);
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(&hspi3, SPI_TX, 2, HAL_MAX_DELAY);
+  HAL_SPI_Receive(&hspi3, &received_data, 1, HAL_MAX_DELAY);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
   return received_data;
 }
 
@@ -151,7 +151,7 @@ int main(void)
   MX_DMA_Init();
   MX_USB_DEVICE_Init();
   MX_ADC1_Init();
-  MX_SPI1_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
 
   Joystick_buffer[0] = 0; // 1.8 przyciskow
