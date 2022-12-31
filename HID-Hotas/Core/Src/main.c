@@ -21,6 +21,7 @@
 #include "adc.h"
 #include "dma.h"
 #include "spi.h"
+#include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
 
@@ -125,7 +126,7 @@ uint8_t MCP23S17_read(uint8_t device, uint8_t address)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t Joystick_buffer[5];
+  uint8_t Joystick_buffer[6];
   uint16_t x_correction;
   uint16_t y_correction;
   /* USER CODE END 1 */
@@ -152,13 +153,15 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_ADC1_Init();
   MX_SPI3_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  Joystick_buffer[0] = 0; // 1.8 przyciskow
-  Joystick_buffer[1] = 0; // 2.8 przyciskow
-  Joystick_buffer[2] = 0; // 3.8 przyciskow
+  Joystick_buffer[0] = 0; // 1A Extender
+  Joystick_buffer[1] = 0; // 1B Extender
+  Joystick_buffer[2] = 0; // 2 Extender
   Joystick_buffer[3] = 0; // X
   Joystick_buffer[4] = 0; // Y
+  Joystick_buffer[5] = 0; // T
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
   HAL_Delay(1000);
   x_correction = ADC_buffer[0];
@@ -175,15 +178,15 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
-    //Joystick_buffer[0] = !HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
     Joystick_buffer[0] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
     Joystick_buffer[1] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
-    Joystick_buffer[2] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
-    //Joystick_buffer[3] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
+    //Joystick_buffer[2] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
+    Joystick_buffer[2] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
     
     Joystick_buffer[3] = map(ADC_buffer[0], x_correction);
     Joystick_buffer[4] = map(ADC_buffer[1], y_correction);
-    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 5);
+    Joystick_buffer[5] = map(ADC_buffer[0], x_correction)/2;
+    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 6);
     HAL_Delay(50);
 
   }
