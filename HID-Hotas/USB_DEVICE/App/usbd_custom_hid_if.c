@@ -94,13 +94,13 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
   0x05, 0x01,        /* Usage Page (Generic Desktop Ctrls)     */
   0x09, 0x04,        /* Usage (Joystick)                       */
   0xA1, 0x01,        /* Collection (Application)               */
-  0x05, 0x02,        /*     Usage Page (Simulation Ctrls)        */
-  0x09, 0xBB,        /*       Usage (Throttle)                   */
-  0x15, 0x00,        /*       Logical Minimum (-127)         ####    */
-  0x25, 0xFF,        /*       Logical Maximum (127)          ####    */
-  0x75, 0x08,        /*       Report Size (8)                    */
-  0x95, 0x01,        /*       Report Count (1)                   */
-  0x81, 0x02,        /*       Input (Data, Variable, Absolute)   */
+  0x05, 0x02,        /*     Usage Page (Simulation Ctrls)      */
+  0x09, 0xBB,        /*       Usage (Throttle)                 */
+  0x15, 0x00,        /*       Logical Minimum (-127)           */
+  0x25, 0xFF,        /*       Logical Maximum (127)            */
+  0x75, 0x08,        /*       Report Size (8)                  */
+  0x95, 0x01,        /*       Report Count (1)                 */
+  0x81, 0x02,        /*       Input (Data, Variable, Absolute) */
   0x09, 0x01,        /*   Usage (Pointer)                      */
   0xA1, 0x00,        /*   Collection (Physical)                */
   0x05, 0x01,        /*     Usage Page (Generic Desktop Ctrls) */

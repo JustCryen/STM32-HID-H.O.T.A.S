@@ -129,7 +129,7 @@ int main(void)
   uint8_t Joystick_buffer[6];
   uint16_t x_correction;
   uint16_t y_correction;
-  uint8_t ThrottleBT[5] = {'\r'};
+  uint8_t ThrottleBT[6] = {'\r'};
   uint16_t Throttle = 0;
   /* USER CODE END 1 */
 
@@ -178,16 +178,21 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    int i = 0;
-    HAL_UART_Receive_DMA(&huart2, ThrottleBT, 5);
-    while (ThrottleBT[i] != '\r' && ThrottleBT[i] != '\n' && i<5)
+    //int i = 0;
+    HAL_UART_Receive_DMA(&huart2, ThrottleBT, 6);
+    if (ThrottleBT[0] == 'x')
     {
-      if (i == 0) Throttle = 0;
-      int ich = ThrottleBT[i] - '0';
-      Throttle = 10 * Throttle + ich;
-      i++;
+      ThrottleBT[0] = '0';
+      //i++;
+      Throttle = atoi((char*) ThrottleBT);
+      //while (ThrottleBT[i] != '\r' && ThrottleBT[i] != '\n' && i<6)
+      //{
+      //  if (i == 1) Throttle = 0;
+      //  int ich = ThrottleBT[i] - '0';
+      //  Throttle = 10 * Throttle + ich;
+      //  i++;
+      //}
     }
-
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
     Joystick_buffer[0] = Throttle/4;
     Joystick_buffer[1] = map(ADC_buffer[0], x_correction);
