@@ -66,11 +66,11 @@ int map(uint16_t probed, uint16_t correction)
   uint16_t result;
   if (probed < correction)
   {
-    result = (((probed - 1056)* 2048) / (correction - 1056)) / 16;
+    result = (4095 - (((probed - 1056)* 2048) / (correction - 1056))) / 16;
   }
   else
   {
-    result = ((((probed - correction)* 2048) / (4095 - correction)) + 2048) / 16;
+    result = (4095 - ((((probed - correction)* 2048) / (4095 - correction)) + 2048)) / 16;
   }
   return result;
 }
@@ -129,6 +129,8 @@ int main(void)
   uint8_t Joystick_buffer[6];
   uint16_t x_correction;
   uint16_t y_correction;
+  uint8_t ThrottleBT[5] = {'\r'};
+  uint16_t Throttle = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -156,12 +158,12 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  Joystick_buffer[0] = 0; // 1A Extender
-  Joystick_buffer[1] = 0; // 1B Extender
-  Joystick_buffer[2] = 0; // 2 Extender
-  Joystick_buffer[3] = 0; // X
-  Joystick_buffer[4] = 0; // Y
-  Joystick_buffer[5] = 0; // T
+  Joystick_buffer[0] = 0; // T
+  Joystick_buffer[1] = 0; // X
+  Joystick_buffer[2] = 0; // Y
+  Joystick_buffer[3] = 0; // // 1A Extender
+  Joystick_buffer[4] = 0; // // 1B Extender
+  Joystick_buffer[5] = 0; // // 2  Extender
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
   HAL_Delay(1000);
   x_correction = ADC_buffer[0];
@@ -176,16 +178,25 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    int i = 0;
+    HAL_UART_Receive_DMA(&huart2, ThrottleBT, 5);
+    while (ThrottleBT[i] != '\r' && ThrottleBT[i] != '\n' && i<5)
+    {
+      if (i == 0) Throttle = 0;
+      int ich = ThrottleBT[i] - '0';
+      Throttle = 10 * Throttle + ich;
+      i++;
+    }
 
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
-    Joystick_buffer[0] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
-    Joystick_buffer[1] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
-    //Joystick_buffer[2] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
-    Joystick_buffer[2] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
+    Joystick_buffer[0] = Throttle/4;
+    Joystick_buffer[1] = map(ADC_buffer[0], x_correction);
+    Joystick_buffer[2] = map(ADC_buffer[1], y_correction);
+    Joystick_buffer[3] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
+    Joystick_buffer[4] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
+    //Joystick_buffer[5] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
+    Joystick_buffer[5] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
     
-    Joystick_buffer[3] = map(ADC_buffer[0], x_correction);
-    Joystick_buffer[4] = map(ADC_buffer[1], y_correction);
-    Joystick_buffer[5] = map(ADC_buffer[0], x_correction)/2;
     USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 6);
     HAL_Delay(50);
 
