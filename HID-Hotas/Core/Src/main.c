@@ -106,8 +106,8 @@ void MCP23S17_write(uint8_t device, uint8_t address, uint8_t value)
 
 uint8_t MCP23S17_read(uint8_t device, uint8_t address)
 {
-  device = device + 1;                                 //change device to read mode 
-  //device |= 0x1;                                       //change device to read mode 
+  //device = device + 1;                                 //change device to read mode 
+  device |= 0x1;                                       //change device to read mode 
   uint8_t received_data = 0;
   uint8_t SPI_TX[2] = {device, address};
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
@@ -116,6 +116,17 @@ uint8_t MCP23S17_read(uint8_t device, uint8_t address)
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
   return received_data;
 }
+
+void Extender_map()
+{
+  
+}
+
+typedef struct InputIndexing
+{
+    uint8_t byte_index;
+    uint8_t bit_index;
+} InputIndexing;
 
 /* USER CODE END 0 */
 
@@ -127,10 +138,18 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
   uint8_t Joystick_buffer[6];
+  uint8_t Extender_raw[4];
   uint16_t x_correction;
   uint16_t y_correction;
   uint8_t ThrottleBT[6] = {'\r'};
   uint16_t Throttle = 0;
+
+  InputIndexing input_map[] = {
+    {0, 0}, {0, 3}, {0, 4}, {0, 2}, {0, 1}, {0, 5}, {0, 6}, {0, 7}, // Paddle / Countermeasures (4pos) / Trigger (2stage) / Weapon Release
+    {1, 0}, {1, 1}, {1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7}, // Trigger management (4pos) / Display management (4pos)
+    {2, 0}, {2, 7}, {3, 0}, {3, 1}, {3, 2}, {3, 3}, {3, 4}, {2, 1}  // Expand / Missle step / Trim (5pos) / -
+  };
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -161,9 +180,9 @@ int main(void)
   Joystick_buffer[0] = 0; // T
   Joystick_buffer[1] = 0; // X
   Joystick_buffer[2] = 0; // Y
-  Joystick_buffer[3] = 0; // // 1A Extender
-  Joystick_buffer[4] = 0; // // 1B Extender
-  Joystick_buffer[5] = 0; // // 2  Extender
+  Joystick_buffer[3] = 0; // 1A Extender
+  Joystick_buffer[4] = 0; // 1B Extender
+  Joystick_buffer[5] = 0; // 2  Extender
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
   HAL_Delay(1000);
   x_correction = ADC_buffer[0];
@@ -178,33 +197,38 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    //int i = 0;
+
     HAL_UART_Receive_DMA(&huart2, ThrottleBT, 6);
     if (ThrottleBT[0] == 'x')
     {
       ThrottleBT[0] = '0';
-      //i++;
       Throttle = atoi((char*) ThrottleBT);
-      //while (ThrottleBT[i] != '\r' && ThrottleBT[i] != '\n' && i<6)
-      //{
-      //  if (i == 1) Throttle = 0;
-      //  int ich = ThrottleBT[i] - '0';
-      //  Throttle = 10 * Throttle + ich;
-      //  i++;
-      //}
     }
+
+    Extender_raw[0] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
+    Extender_raw[1] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
+    Extender_raw[2] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
+    Extender_raw[3] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
+    uint8_t Extender_data[3] = {0};
+
+    for(int index = 0; index < 24; index++)
+    {
+      InputIndexing *input_loc = input_map + index;
+      int Extender_value = (Extender_raw[input_loc->byte_index] >> input_loc->bit_index) & 0x1;
+      int curr_byte_index = index / 8;
+      int curr_bit_index  = index % 8;
+      Extender_data[curr_byte_index] |= Extender_value << curr_bit_index;
+    }
+
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
     Joystick_buffer[0] = Throttle/4;
     Joystick_buffer[1] = map(ADC_buffer[0], x_correction);
     Joystick_buffer[2] = map(ADC_buffer[1], y_correction);
-    Joystick_buffer[3] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
-    Joystick_buffer[4] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
-    //Joystick_buffer[5] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
-    Joystick_buffer[5] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
-    
+    Joystick_buffer[3] = Extender_data[0];
+    Joystick_buffer[4] = Extender_data[1];
+    Joystick_buffer[5] = Extender_data[2];
     USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 6);
     HAL_Delay(50);
-
   }
   /* USER CODE END 3 */
 }
