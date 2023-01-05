@@ -180,9 +180,9 @@ int main(void)
   Joystick_buffer[0] = 0; // T
   Joystick_buffer[1] = 0; // X
   Joystick_buffer[2] = 0; // Y
-  Joystick_buffer[3] = 0; // 1A Extender
-  Joystick_buffer[4] = 0; // 1B Extender
-  Joystick_buffer[5] = 0; // 2  Extender
+  Joystick_buffer[3] = 0; // Extender
+  Joystick_buffer[4] = 0; // Extender
+  Joystick_buffer[5] = 0; // Extender
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
   HAL_Delay(1000);
   x_correction = ADC_buffer[0];
