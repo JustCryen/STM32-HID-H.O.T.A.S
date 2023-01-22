@@ -97,7 +97,7 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
   0x05, 0x02,        /*     Usage Page (Simulation Ctrls)      */
   0x09, 0xBB,        /*       Usage (Throttle)                 */
   0x15, 0x00,        /*       Logical Minimum (0)              */
-  0x25, 0xFF,        /*       Logical Maximum (255)            */
+  0x26, 0xFF, 0x00,  /*       Logical Maximum (255)            */
   0x75, 0x08,        /*       Report Size (8)                  */
   0x95, 0x01,        /*       Report Count (1)                 */
   0x81, 0x02,        /*       Input (Data,Var,Abs)             */
@@ -107,7 +107,7 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
   0x09, 0x30,        /*       Usage (X)                        */
   0x09, 0x31,        /*       Usage (Y)                        */
   0x15, 0x00,        /*       Logical Minimum (0)              */
-  0x25, 0xFF,        /*       Logical Maximum (255)            */
+  0x26, 0xFF, 0x00,  /*       Logical Maximum (255)            */
   0x75, 0x08,        /*       Report Size (8)                  */
   0x95, 0x02,        /*       Report Count (2)                 */
   0x81, 0x02,        /*       Input (Data,Var,Abs)             */
