@@ -106,7 +106,6 @@ void MCP23S17_write(uint8_t device, uint8_t address, uint8_t value)
 
 uint8_t MCP23S17_read(uint8_t device, uint8_t address)
 {
-  //device = device + 1;                                 //change device to read mode 
   device |= 0x1;                                       //change device to read mode 
   uint8_t received_data = 0;
   uint8_t SPI_TX[2] = {device, address};
@@ -115,11 +114,6 @@ uint8_t MCP23S17_read(uint8_t device, uint8_t address)
   HAL_SPI_Receive(&hspi3, &received_data, 1, HAL_MAX_DELAY);
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
   return received_data;
-}
-
-void Extender_map()
-{
-  
 }
 
 typedef struct InputIndexing
