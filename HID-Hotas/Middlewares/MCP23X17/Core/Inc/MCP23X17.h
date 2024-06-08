@@ -23,7 +23,9 @@
 #define MCP_GPIOB         0x13      //General purpose I/O Register for PORTB
 #define MCP_OLATA         0x14      //Output latch Register for PORTA
 #define MCP_OLATB         0x15      //Output latch Register for PORTB
-                                                                         
-void setup_MCP23S17();                           
-void MCP23S17_write(uint8_t device, uint8_t address, uint8_t value);         
-uint8_t MCP23S17_read(uint8_t device, uint8_t address);  
+
+#ifdef serial_MCP23S17
+  void setup_MCP23X17();
+  void MCP23X17_write(uint8_t device, uint8_t address, uint8_t value);
+  uint8_t MCP23X17_read(uint8_t device, uint8_t address);
+#endif

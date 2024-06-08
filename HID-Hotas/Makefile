@@ -141,7 +141,8 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
 -IDrivers/CMSIS/Include \
 -IMiddlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Inc \
--IMiddlewares/MCP23S17/Core/Inc
+-IMiddlewares/MCP23X17/Core/Inc \
+-IMiddlewares/MCP23X17/Core/src
 
 
 # compile gcc flags
