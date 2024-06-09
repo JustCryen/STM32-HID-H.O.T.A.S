@@ -28,7 +28,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-//#define serial_MCP23S17
+#define serial_MCP23S17
 #define serial_MCP23017
 #include "serial.c"
 #include "usbd_customhid.h"

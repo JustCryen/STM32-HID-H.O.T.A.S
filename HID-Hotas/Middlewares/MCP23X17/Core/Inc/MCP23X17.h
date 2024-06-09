@@ -27,3 +27,7 @@
 void setup_MCP23X17();
 void MCP23X17_write(uint8_t device, uint8_t address, uint8_t value);
 uint8_t MCP23X17_read(uint8_t device, uint8_t address);
+void MCP23S17_write(uint8_t device, uint8_t address, uint8_t value);
+uint8_t MCP23S17_read(uint8_t device, uint8_t address);
+void MCP23017_write(uint8_t device, uint8_t address, uint8_t value);
+uint8_t MCP23017_read(uint8_t device, uint8_t address);
