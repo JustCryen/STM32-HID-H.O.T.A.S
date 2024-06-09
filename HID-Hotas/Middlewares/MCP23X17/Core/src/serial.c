@@ -11,7 +11,7 @@
     MCP23X17_write(IO_DEVICE_1, MCP_IPOLA, 0xFF);       //Signal polarity on side A
     MCP23X17_write(IO_DEVICE_1, MCP_IPOLB, 0xFF);       //Signal polarity on side B
 
-    MCP23X17_write(IO_DEVICE_2, MCP_IOCONA, 0x38);      //Device Configutation
+/*  MCP23X17_write(IO_DEVICE_2, MCP_IOCONA, 0x38);      //Device Configutation
     MCP23X17_write(IO_DEVICE_2, MCP_IOCONB, 0x38);      //Device Configutation
     MCP23X17_write(IO_DEVICE_2, MCP_IODIRA, 0xFF);      //Set pins as inputs or outputs on side A
     MCP23X17_write(IO_DEVICE_2, MCP_IODIRB, 0xFF);      //Set pins as inputs or outputs on side B
@@ -19,7 +19,7 @@
     MCP23X17_write(IO_DEVICE_2, MCP_GPPUB, 0xFF);       //I/O pullup pin state on side B
     MCP23X17_write(IO_DEVICE_2, MCP_IPOLA, 0xFF);       //Signal polarity on side A
     MCP23X17_write(IO_DEVICE_2, MCP_IPOLB, 0xFF);       //Signal polarity on side B
-  }
+*/}
 
 #ifdef serial_MCP23S17
   void MCP23X17_write(uint8_t device, uint8_t address, uint8_t value)
@@ -44,16 +44,17 @@
 #endif
 
 #ifdef serial_MCP23017
-//   void MCP23X17_write(uint8_t device, uint8_t address, uint8_t value)
-//   {
-//     uint8_t SPI_TX[3] = {device, address, value};
+  void MCP23X17_write(uint8_t device, uint8_t address, uint8_t value)
+  {
+    uint8_t SPI_TX[3] = {device, address, value};
     
-//   }
-//   uint8_t MCP23X17_read(uint8_t device, uint8_t address)
-//   {
-//     device |= 0x1;                                       //change device to read mode 
-//     uint8_t received_data = 0;
-//     uint8_t SPI_TX[2] = {device, address};
+  }
+  uint8_t MCP23X17_read(uint8_t device, uint8_t address)
+  {
+    device |= 0x1;                                       //change device to read mode 
+    uint8_t received_data = 0;
+    uint8_t SPI_TX[2] = {device, address};
     
-//   }
+	return received_data;
+  }
 #endif

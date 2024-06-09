@@ -20,6 +20,7 @@
 #include "main.h"
 #include "adc.h"
 #include "dma.h"
+#include "i2c.h"
 #include "spi.h"
 #include "usart.h"
 #include "usb_device.h"
@@ -129,6 +130,7 @@ int main(void)
   MX_ADC1_Init();
   MX_SPI3_Init();
   MX_USART2_UART_Init();
+  MX_I2C3_Init();
   /* USER CODE BEGIN 2 */
 
   Joystick_buffer[0] = 0; // T
