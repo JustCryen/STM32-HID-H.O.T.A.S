@@ -144,7 +144,28 @@ int main(void)
   HAL_Delay(1000);
   x_correction = ADC_buffer[0];
   y_correction = ADC_buffer[1];
-  setup_MCP23X17();
+  setup_MCP23S17();
+  typedef enum {false, true} bool;
+  bool protocol_spi = 0;	//set SPI
+  bool protocol_i2c = 0;	//set I2C
+  //Test protocol
+  HAL_Delay(1000);
+  uint8_t select=0;
+  select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
+  select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
+  select = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
+  select = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
+  if (select == 0xFF)
+  {					//select only I2C
+    	protocol_spi = 0;
+    	protocol_i2c = 1;
+		setup_MCP23017();
+  }
+  else 
+  {					//select only SPI
+      protocol_spi = 1;
+      protocol_i2c = 0;
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -161,11 +182,21 @@ int main(void)
       ThrottleBT[0] = '0';
       Throttle = atoi((char*) ThrottleBT);
     }
-
-    Extender_raw[0] = MCP23X17_read(IO_DEVICE_1, MCP_GPIOA);
-    Extender_raw[1] = MCP23X17_read(IO_DEVICE_1, MCP_GPIOB);
-    Extender_raw[2] = MCP23X17_read(IO_DEVICE_2, MCP_GPIOA);
-    Extender_raw[3] = MCP23X17_read(IO_DEVICE_2, MCP_GPIOB);
+	
+	if (protocol_i2c)
+	{
+    	Extender_raw[0] = MCP23017_read(IO_DEVICE_1, MCP_GPIOA);
+    	Extender_raw[1] = MCP23017_read(IO_DEVICE_1, MCP_GPIOB);
+    	Extender_raw[2] = MCP23017_read(IO_DEVICE_2, MCP_GPIOA);
+    	Extender_raw[3] = MCP23017_read(IO_DEVICE_2, MCP_GPIOB);
+	}
+	else //if (protocol_spi)
+	{
+		Extender_raw[0] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
+    	Extender_raw[1] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
+    	Extender_raw[2] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
+    	Extender_raw[3] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
+	}
     uint8_t Extender_data[3] = {0};
 
     for(int index = 0; index < 24; index++)
