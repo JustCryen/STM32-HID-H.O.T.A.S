@@ -22,14 +22,16 @@
 #include "dma.h"
 #include "i2c.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#define serial_MCP23S17
-#define serial_MCP23017
+// #define serial_MCP23S17
+// #define serial_MCP23017
+#include "tunes.c"
 #include "serial.c"
 #include "usbd_customhid.h"
 /* USER CODE END Includes */
@@ -99,6 +101,7 @@ int main(void)
   uint16_t y_correction;
   uint8_t ThrottleBT[6] = {'\r'};
   uint16_t Throttle = 0;
+  uint16_t heartbit_delay = 50;
 
   InputIndexing input_map[] = {
     {0, 0}, {0, 3}, {0, 4}, {0, 2}, {0, 1}, {0, 5}, {0, 6}, {0, 7}, // Paddle / Countermeasures (4pos) / Trigger (2stage) / Weapon Release
@@ -132,8 +135,12 @@ int main(void)
   MX_SPI3_Init();
   MX_USART2_UART_Init();
   MX_I2C3_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
+//   TIM4->CCR4 = 50*65535/100; // duty cycle 50%
+  tune_init();
   Joystick_buffer[0] = 0; // T
   Joystick_buffer[1] = 0; // X
   Joystick_buffer[2] = 0; // Y
@@ -146,8 +153,7 @@ int main(void)
   y_correction = ADC_buffer[1];
   setup_MCP23S17();
   typedef enum {false, true} bool;
-  bool protocol_spi = 0;	//set SPI
-  bool protocol_i2c = 0;	//set I2C
+  bool protocol = 0;	//default SPI
   //Test protocol
   HAL_Delay(1000);
   uint8_t select=0;
@@ -156,15 +162,13 @@ int main(void)
   select = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
   select = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
   if (select == 0xFF)
-  {					//select only I2C
-    	protocol_spi = 0;
-    	protocol_i2c = 1;
-		setup_MCP23017();
+  {					//select I2C
+	protocol = 1;
+	setup_MCP23017();
   }
   else 
-  {					//select only SPI
-      protocol_spi = 1;
-      protocol_i2c = 0;
+  {					//select SPI
+	protocol = 0;
   }
   /* USER CODE END 2 */
 
@@ -175,6 +179,18 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    if (heartbit_delay > 0)
+	  heartbit_delay -= 1;
+	else {
+      tune_heartbeat();
+	  heartbit_delay = 100;
+	}
+
+    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == 0) {
+      x_correction = ADC_buffer[0];
+      y_correction = ADC_buffer[1];
+	  tune_calibrated();
+	}
 
     HAL_UART_Receive_DMA(&huart2, ThrottleBT, 6);
     if (ThrottleBT[0] == 'x')
@@ -183,14 +199,14 @@ int main(void)
       Throttle = atoi((char*) ThrottleBT);
     }
 	
-	if (protocol_i2c)
+	if (protocol)	// I2C
 	{
     	Extender_raw[0] = MCP23017_read(IO_DEVICE_1, MCP_GPIOA);
     	Extender_raw[1] = MCP23017_read(IO_DEVICE_1, MCP_GPIOB);
     	Extender_raw[2] = MCP23017_read(IO_DEVICE_2, MCP_GPIOA);
     	Extender_raw[3] = MCP23017_read(IO_DEVICE_2, MCP_GPIOB);
 	}
-	else //if (protocol_spi)
+	else			// SPI
 	{
 		Extender_raw[0] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
     	Extender_raw[1] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
