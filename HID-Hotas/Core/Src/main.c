@@ -138,38 +138,19 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
-//   TIM4->CCR4 = 50*65535/100; // duty cycle 50%
-  tune_init();
   Joystick_buffer[0] = 0; // T
   Joystick_buffer[1] = 0; // X
   Joystick_buffer[2] = 0; // Y
   Joystick_buffer[3] = 0; // Extender
   Joystick_buffer[4] = 0; // Extender
   Joystick_buffer[5] = 0; // Extender
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
+  tune_init();
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
   HAL_Delay(1000);
   x_correction = ADC_buffer[0];
   y_correction = ADC_buffer[1];
-  setup_MCP23S17();
-  typedef enum {false, true} bool;
-  bool protocol = 0;	//default SPI
-  //Test protocol
-  HAL_Delay(1000);
-  uint8_t select=0;
-  select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
-  select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
-  select = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
-  select = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
-  if (select == 0xFF)
-  {					//select I2C
-	protocol = 1;
-	setup_MCP23017();
-  }
-  else 
-  {					//select SPI
-	protocol = 0;
-  }
+  setup_MCP23X17();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -187,6 +168,7 @@ int main(void)
 	}
 
     if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == 0) {
+	  setup_MCP23017();
       x_correction = ADC_buffer[0];
       y_correction = ADC_buffer[1];
 	  tune_calibrated();
@@ -199,20 +181,10 @@ int main(void)
       Throttle = atoi((char*) ThrottleBT);
     }
 	
-	if (protocol)	// I2C
-	{
-    	Extender_raw[0] = MCP23017_read(IO_DEVICE_1, MCP_GPIOA);
-    	Extender_raw[1] = MCP23017_read(IO_DEVICE_1, MCP_GPIOB);
-    	Extender_raw[2] = MCP23017_read(IO_DEVICE_2, MCP_GPIOA);
-    	Extender_raw[3] = MCP23017_read(IO_DEVICE_2, MCP_GPIOB);
-	}
-	else			// SPI
-	{
-		Extender_raw[0] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
-    	Extender_raw[1] = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
-    	Extender_raw[2] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
-    	Extender_raw[3] = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
-	}
+    Extender_raw[0] = MCP23X17_read(IO_DEVICE_1, MCP_GPIOA);
+    Extender_raw[1] = MCP23X17_read(IO_DEVICE_1, MCP_GPIOB);
+    Extender_raw[2] = MCP23X17_read(IO_DEVICE_2, MCP_GPIOA);
+    Extender_raw[3] = MCP23X17_read(IO_DEVICE_2, MCP_GPIOB);
     uint8_t Extender_data[3] = {0};
 
     for(int index = 0; index < 24; index++)

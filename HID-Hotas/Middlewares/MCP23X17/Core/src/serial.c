@@ -1,4 +1,67 @@
 #include "MCP23X17.h"
+// #include <stdbool.h>
+
+  typedef enum {false, true} bool;
+
+  bool protocol = 0;	//default SPI
+
+  void setup_MCP23X17()
+  {
+    // MCP23X17_write(IO_DEVICE_1, MCP_IOCONA, 0x38);      //Device Configutation
+    // MCP23X17_write(IO_DEVICE_1, MCP_IOCONB, 0x38);      //Device Configutation
+    // MCP23X17_write(IO_DEVICE_1, MCP_IODIRA, 0xFF);      //Set pins as inputs or outputs on side A
+    // MCP23X17_write(IO_DEVICE_1, MCP_IODIRB, 0xFF);      //Set pins as inputs or outputs on side B
+    // MCP23X17_write(IO_DEVICE_1, MCP_GPPUA, 0xFF);       //I/O pullup pin state on side A
+    // MCP23X17_write(IO_DEVICE_1, MCP_GPPUB, 0xFF);       //I/O pullup pin state on side B
+    // MCP23X17_write(IO_DEVICE_1, MCP_IPOLA, 0xFF);       //Signal polarity on side A
+    // MCP23X17_write(IO_DEVICE_1, MCP_IPOLB, 0xFF);       //Signal polarity on side B
+
+    // MCP23X17_write(IO_DEVICE_2, MCP_IOCONA, 0x38);      //Device Configutation
+    // MCP23X17_write(IO_DEVICE_2, MCP_IOCONB, 0x38);      //Device Configutation
+    // MCP23X17_write(IO_DEVICE_2, MCP_IODIRA, 0xFF);      //Set pins as inputs or outputs on side A
+    // MCP23X17_write(IO_DEVICE_2, MCP_IODIRB, 0xFF);      //Set pins as inputs or outputs on side B
+    // MCP23X17_write(IO_DEVICE_2, MCP_GPPUA, 0xFF);       //I/O pullup pin state on side A
+    // MCP23X17_write(IO_DEVICE_2, MCP_GPPUB, 0xFF);       //I/O pullup pin state on side B
+    // MCP23X17_write(IO_DEVICE_2, MCP_IPOLA, 0xFF);       //Signal polarity on side A
+    // MCP23X17_write(IO_DEVICE_2, MCP_IPOLB, 0xFF);       //Signal polarity on side B
+    setup_MCP23S17();
+    
+	//Tesr protocol
+	HAL_Delay(50);
+    uint8_t select = 0;
+    select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
+    if (select == 0xFF)
+    {					//set I2C
+	  protocol = 1;
+	  setup_MCP23017();
+    }
+	else 
+	{					//keep SPI
+      protocol = 0;
+	}
+
+	///
+
+// 	  setup_MCP23S17();
+//   //Test protocol
+//   HAL_Delay(1000);
+//   uint8_t select=0;
+//   select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
+//   select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
+//   select = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
+//   select = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
+//   if (select == 0xFF)
+//   {					//select I2C
+// 	protocol = 1;
+// 	setup_MCP23017();
+//   }
+//   else 
+//   {					//select SPI
+// 	protocol = 0;
+//   }
+
+  }
+
 
   void setup_MCP23S17()
   {
@@ -22,12 +85,12 @@
   }
 
 
- void setup_MCP23017()
+  void setup_MCP23017()
   {
     MCP23017_write(IO_DEVICE_1, MCP_IOCONA, 0x38);      //Device Configutation
     MCP23017_write(IO_DEVICE_1, MCP_IOCONB, 0x38);      //Device Configutation
     MCP23017_write(IO_DEVICE_1, MCP_IODIRA, 0xFF);      //Set pins as inputs or outputs on side A
-    MCP23017_write(IO_DEVICE_1, MCP_IODIRB, 0xFF);      //Set pins as inputs or outputs on side B
+    MCP23017_write(IO_DEVICE_1, MCP_IODIRB, 0x7F);      //Set pins as inputs or outputs on side B
     MCP23017_write(IO_DEVICE_1, MCP_GPPUA, 0xFF);       //I/O pullup pin state on side A
     MCP23017_write(IO_DEVICE_1, MCP_GPPUB, 0xFF);       //I/O pullup pin state on side B
     MCP23017_write(IO_DEVICE_1, MCP_IPOLA, 0xFF);       //Signal polarity on side A
@@ -43,22 +106,20 @@
     MCP23017_write(IO_DEVICE_2, MCP_IPOLB, 0xFF);       //Signal polarity on side B
   }
 
- // void MCP23X17_write(uint8_t device, uint8_t address, uint8_t value)
- // {
- //   if (protocolspi == 1) MCP23S17_write(device, address, value);
-//	if (protocoli2c == 1) MCP23017_write(device, address, value);
-//  }
+  void MCP23X17_write(uint8_t device, uint8_t address, uint8_t value)
+  {
+    if (protocol == 0) MCP23S17_write(device, address, value);
+    if (protocol == 1) MCP23017_write(device, address, value);
+  }
 
   uint8_t MCP23X17_read(uint8_t device, uint8_t address)
   {
     uint8_t received_data = 0;
-    //if (protocolspi == 1) received_data = MCP23S17_read(device, address);
-	//if (protocoli2c == 1) 
-	received_data = MCP23017_read(device, address);
-	//else if (protocolspi == 1) 
-	received_data = MCP23S17_read(device, address);
-	return received_data;
+    if (protocol == 0) received_data = MCP23S17_read(device, address);
+    if (protocol == 1) received_data = MCP23017_read(device, address);
+    return received_data;
   }
+
 
 
   void MCP23S17_write(uint8_t device, uint8_t address, uint8_t value)
