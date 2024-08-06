@@ -24,11 +24,12 @@
     // MCP23X17_write(IO_DEVICE_2, MCP_GPPUB, 0xFF);       //I/O pullup pin state on side B
     // MCP23X17_write(IO_DEVICE_2, MCP_IPOLA, 0xFF);       //Signal polarity on side A
     // MCP23X17_write(IO_DEVICE_2, MCP_IPOLB, 0xFF);       //Signal polarity on side B
+
     setup_MCP23S17();
     
 	//Tesr protocol
-	HAL_Delay(50);
     uint8_t select = 0;
+	HAL_Delay(1000);
     select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
     if (select == 0xFF)
     {					//set I2C
@@ -39,27 +40,6 @@
 	{					//keep SPI
       protocol = 0;
 	}
-
-	///
-
-// 	  setup_MCP23S17();
-//   //Test protocol
-//   HAL_Delay(1000);
-//   uint8_t select=0;
-//   select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
-//   select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOB);
-//   select = MCP23S17_read(IO_DEVICE_2, MCP_GPIOA);
-//   select = MCP23S17_read(IO_DEVICE_2, MCP_GPIOB);
-//   if (select == 0xFF)
-//   {					//select I2C
-// 	protocol = 1;
-// 	setup_MCP23017();
-//   }
-//   else 
-//   {					//select SPI
-// 	protocol = 0;
-//   }
-
   }
 
 
