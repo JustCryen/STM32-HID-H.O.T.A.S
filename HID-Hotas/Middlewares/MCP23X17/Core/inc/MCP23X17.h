@@ -24,11 +24,35 @@
 #define MCP_OLATA         0x14      //Output latch Register for PORTA
 #define MCP_OLATB         0x15      //Output latch Register for PORTB
 
-void setup_MCP23S17();
-void setup_MCP23017();
-void MCP23X17_write(uint8_t device, uint8_t address, uint8_t value);
-uint8_t MCP23X17_read(uint8_t device, uint8_t address);
-void MCP23S17_write(uint8_t device, uint8_t address, uint8_t value);
-uint8_t MCP23S17_read(uint8_t device, uint8_t address);
-void MCP23017_write(uint8_t device, uint8_t address, uint8_t value);
-uint8_t MCP23017_read(uint8_t device, uint8_t address);
+  void setup_MCP23S17();
+  void setup_MCP23017();
+  void MCP23X17_write(uint8_t device, uint8_t address, uint8_t value);
+  uint8_t MCP23X17_read(uint8_t device, uint8_t address);
+  void MCP23S17_write(uint8_t device, uint8_t address, uint8_t value);
+  uint8_t MCP23S17_read(uint8_t device, uint8_t address);
+  void MCP23017_write(uint8_t device, uint8_t address, uint8_t value);
+  uint8_t MCP23017_read(uint8_t device, uint8_t address);
+
+  typedef enum {false, true} bool;
+  
+  typedef struct InputIndexing
+  {
+    uint8_t byte_index;
+    uint8_t bit_index;
+  } InputIndexing;
+  
+  InputIndexing input_map_spi[] = {
+    {0, 0}, {0, 3}, {0, 4}, {0, 2}, {0, 1}, {0, 5}, {0, 6}, {0, 7}, // Paddle / Countermeasures (4pos) / Trigger (2stage) / Weapon Release
+    {1, 0}, {1, 1}, {1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7}, // Trigger management (4pos) / Display management (4pos)
+    {2, 0}, {2, 7}, {3, 0}, {3, 1}, {3, 2}, {3, 3}, {3, 4}, {2, 1}  // Expand / Missle step / Trim (5pos) / -
+  };
+  
+  InputIndexing input_map[] = {
+    {0, 0}, {2, 1}, {2, 4}, {2, 2}, {2, 5}, {2, 3}, {3, 3}, {3, 4}, // Paddle / Countermeasures (5pos) / Trigger (2stage)
+    {1, 5}, {1, 3}, {1, 2}, {1, 4}, {1, 0}, {1, 1}, {0, 7}, {0, 6}, // Weapon Release / Trigger management (5pos) / Display management (2/5pos)
+    {0, 3}, {0, 5}, {0, 4}, {2, 0}, {0, 2},                 {3, 1}, // Display management (3/5pos) / Expand / Missle step / Trim (3/5pos)
+    {3, 0}, {3, 2} // Trim (2/5pos) / -
+    // {2, 7}, {3, 5}, {3, 6}, {3, 7}
+    // {1, 7}, {3, 2}
+    // BLANK?  {1, 6}, {2, 6}, {0, 1}, 
+  };

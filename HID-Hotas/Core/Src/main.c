@@ -79,13 +79,6 @@ int map(uint16_t probed, uint16_t correction)
   }
   return result;
 }
-
-typedef struct InputIndexing
-{
-    uint8_t byte_index;
-    uint8_t bit_index;
-} InputIndexing;
-
 /* USER CODE END 0 */
 
 /**
@@ -102,13 +95,6 @@ int main(void)
   uint8_t ThrottleBT[6] = {'\r'};
   uint16_t Throttle = 0;
   uint16_t heartbit_delay = 50;
-
-  InputIndexing input_map[] = {
-    {0, 0}, {0, 3}, {0, 4}, {0, 2}, {0, 1}, {0, 5}, {0, 6}, {0, 7}, // Paddle / Countermeasures (4pos) / Trigger (2stage) / Weapon Release
-    {1, 0}, {1, 1}, {1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7}, // Trigger management (4pos) / Display management (4pos)
-    {2, 0}, {2, 7}, {3, 0}, {3, 1}, {3, 2}, {3, 3}, {3, 4}, {2, 1}  // Expand / Missle step / Trim (5pos) / -
-  };
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -151,6 +137,9 @@ int main(void)
   x_correction = ADC_buffer[0];
   y_correction = ADC_buffer[1];
   setup_MCP23X17();
+  if (protocol) {
+	MCP23X17_write(IO_DEVICE_1, MCP_OLATB, 0x40);
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */

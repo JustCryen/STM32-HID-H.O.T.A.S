@@ -1,8 +1,6 @@
 #include "MCP23X17.h"
 // #include <stdbool.h>
 
-  typedef enum {false, true} bool;
-
   bool protocol = 0;	//default SPI
 
   void setup_MCP23X17()
@@ -70,7 +68,7 @@
     MCP23017_write(IO_DEVICE_1, MCP_IOCONA, 0x38);      //Device Configutation
     MCP23017_write(IO_DEVICE_1, MCP_IOCONB, 0x38);      //Device Configutation
     MCP23017_write(IO_DEVICE_1, MCP_IODIRA, 0xFF);      //Set pins as inputs or outputs on side A
-    MCP23017_write(IO_DEVICE_1, MCP_IODIRB, 0x7F);      //Set pins as inputs or outputs on side B
+    MCP23017_write(IO_DEVICE_1, MCP_IODIRB, 0xBF);      //Set pins as inputs or outputs on side B - added output led
     MCP23017_write(IO_DEVICE_1, MCP_GPPUA, 0xFF);       //I/O pullup pin state on side A
     MCP23017_write(IO_DEVICE_1, MCP_GPPUB, 0xFF);       //I/O pullup pin state on side B
     MCP23017_write(IO_DEVICE_1, MCP_IPOLA, 0xFF);       //Signal polarity on side A
