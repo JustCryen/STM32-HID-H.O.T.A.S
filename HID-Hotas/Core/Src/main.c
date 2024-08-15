@@ -26,6 +26,7 @@
 #include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
+#include "math.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -66,18 +67,33 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
-int map(uint16_t probed, uint16_t correction)
+int centering(uint16_t probed, uint16_t correction)
 {
   uint16_t result;
   if (probed < correction)
   {
-    result = (4095 - (((probed - 1056)* 2048) / (correction - 1056))) / 16;
+    result = (4095 - (((probed - 1056)* 2048) / (correction - 1056)));
   }
   else
   {
-    result = (4095 - ((((probed - correction)* 2048) / (4095 - correction)) + 2048)) / 16;
+    result = (4095 - ((((probed - correction)* 2048) / (4095 - correction)) + 2048));
   }
   return result;
+}
+int expo(uint16_t probed2, uint16_t correction2)
+{
+  uint16_t x = centering(probed2, correction2);
+  uint16_t result2;
+  if (probed2 < correction2)
+  {
+	result2 = ( 64 * exp((( x)-2048) / (510.0) ) + 2048)/16;
+	if (result2 > 255) result2 = 255;
+  }
+  else
+  {
+	result2 = (-64 * exp(((-x)+2048) / (510.0) ) + 2048)/16;
+  }
+  return result2;
 }
 /* USER CODE END 0 */
 
@@ -186,9 +202,10 @@ int main(void)
     }
 
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
-    Joystick_buffer[0] = Throttle/4;
-    Joystick_buffer[1] = map(ADC_buffer[0], x_correction);
-    Joystick_buffer[2] = map(ADC_buffer[1], y_correction);
+    // Joystick_buffer[0] = Throttle/4;
+    Joystick_buffer[0] = centering(ADC_buffer[0], x_correction)/16;
+    Joystick_buffer[1] = expo(ADC_buffer[0], x_correction);
+    Joystick_buffer[2] = expo(ADC_buffer[1], y_correction);
     Joystick_buffer[3] = Extender_data[0];
     Joystick_buffer[4] = Extender_data[1];
     Joystick_buffer[5] = Extender_data[2];
