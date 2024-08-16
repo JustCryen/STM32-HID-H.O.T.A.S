@@ -84,14 +84,21 @@ int expo(uint16_t probed2, uint16_t correction2)
 {
   uint16_t x = centering(probed2, correction2);
   uint16_t result2;
-  if (probed2 < correction2)
+  if (abs(x-2048) < 64)
   {
-	result2 = ( 64 * exp((( x)-2048) / (510.0) ) + 2048)/16;
-	if (result2 > 255) result2 = 255;
+	result2 = x/16;
   }
   else
   {
-	result2 = (-64 * exp(((-x)+2048) / (510.0) ) + 2048)/16;
+	if (x > 2048)
+	{
+		result2 = ( 64 * exp((( x)-2048) / (510.0) ) + 2048)/16;
+		if (result2 > 255) result2 = 255;
+	}
+	else
+	{
+		result2 = (-64 * exp(((-x)+2048) / (510.0) ) + 2048)/16;
+	}
   }
   return result2;
 }
