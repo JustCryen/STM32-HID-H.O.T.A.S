@@ -26,7 +26,6 @@
 #include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
-#include "math.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -35,6 +34,7 @@
 #include "tunes.c"
 #include "serial.c"
 #include "usbd_customhid.h"
+#include "math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
