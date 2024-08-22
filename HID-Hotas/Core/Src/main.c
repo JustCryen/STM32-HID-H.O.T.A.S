@@ -111,7 +111,7 @@ int expo(uint16_t probed2, uint16_t correction2)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t Joystick_buffer[6];
+  uint8_t Joystick_buffer[7];
   uint8_t Extender_raw[4];
   uint16_t x_correction;
   uint16_t y_correction;
@@ -153,6 +153,7 @@ int main(void)
   Joystick_buffer[3] = 0; // Extender
   Joystick_buffer[4] = 0; // Extender
   Joystick_buffer[5] = 0; // Extender
+  Joystick_buffer[6] = 0; // Extender
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
   tune_init();
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
@@ -197,9 +198,9 @@ int main(void)
     Extender_raw[1] = MCP23X17_read(IO_DEVICE_1, MCP_GPIOB);
     Extender_raw[2] = MCP23X17_read(IO_DEVICE_2, MCP_GPIOA);
     Extender_raw[3] = MCP23X17_read(IO_DEVICE_2, MCP_GPIOB);
-    uint8_t Extender_data[3] = {0};
+    uint8_t Extender_data[4] = {0};
 
-    for(int index = 0; index < 24; index++)
+    for(int index = 0; index < 32; index++)
     {
       InputIndexing *input_loc = input_map + index;
       int Extender_value = (Extender_raw[input_loc->byte_index] >> input_loc->bit_index) & 0x1;
@@ -216,7 +217,8 @@ int main(void)
     Joystick_buffer[3] = Extender_data[0];
     Joystick_buffer[4] = Extender_data[1];
     Joystick_buffer[5] = Extender_data[2];
-    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 6);
+    Joystick_buffer[6] = Extender_data[3];
+    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 7);
     HAL_Delay(50);
   }
   /* USER CODE END 3 */
