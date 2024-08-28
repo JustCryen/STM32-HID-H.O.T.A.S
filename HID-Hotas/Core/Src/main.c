@@ -210,8 +210,7 @@ int main(void)
     }
 
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_buffer, 2);
-    // Joystick_buffer[0] = Throttle/4;
-    Joystick_buffer[0] = centering(ADC_buffer[0], x_correction)/16;
+    Joystick_buffer[0] = Throttle/4;
     Joystick_buffer[1] = expo(ADC_buffer[0], x_correction);
     Joystick_buffer[2] = expo(ADC_buffer[1], y_correction);
     Joystick_buffer[3] = Extender_data[0];
