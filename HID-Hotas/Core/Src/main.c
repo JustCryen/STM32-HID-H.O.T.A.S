@@ -223,7 +223,7 @@ int main(void)
     Joystick_buffer[3] = Extender_data[0];
     Joystick_buffer[4] = Extender_data[1];
     Joystick_buffer[5] = Extender_data[2];
-    Joystick_buffer[6] = (~ThrottleButtons & 0x0F) << 2 |	// insert 4 buttons from the throttle
+    Joystick_buffer[6] = (~ThrottleButtons & 0x3F) << 2 |	// insert 6 buttons from the throttle
                          (Extender_data[3] & 0x03);
     USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 7);
     HAL_Delay(50);
