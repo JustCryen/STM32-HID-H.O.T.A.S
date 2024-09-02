@@ -115,8 +115,9 @@ int main(void)
   uint8_t Extender_raw[4];
   uint16_t x_correction;
   uint16_t y_correction;
-  uint8_t ThrottleBT[6] = {'\r'};
-  uint16_t Throttle = 0;
+  uint8_t ThrottleBT[5] = {0};
+  uint16_t Throttle = 0x00;
+  uint16_t ThrottleButtons = 0xFF;
   uint16_t heartbit_delay = 50;
   /* USER CODE END 1 */
 
@@ -187,13 +188,19 @@ int main(void)
 	  tune_calibrated();
 	}
 
-    HAL_UART_Receive_DMA(&huart2, ThrottleBT, 6);
-    if (ThrottleBT[0] == 'x')
+    HAL_UART_Receive_DMA(&huart2, ThrottleBT, 5);
+    if (ThrottleBT[0] == 'z')				// detect Z axis data packet
+    {
+      ThrottleBT[0] = '0';					// rewrite x as 0 to be able to convert char to int
+      Throttle = atoi((char*) ThrottleBT);
+    } else if (ThrottleBT[0] == 'b')		// detect buttons data packet
     {
       ThrottleBT[0] = '0';
-      Throttle = atoi((char*) ThrottleBT);
+      ThrottleButtons = atoi((char*) ThrottleBT);
+    //   ThrottleB2 = ThrottleBT[2];
+    //   ThrottleB3 = ThrottleBT[3];
+    //   ThrottleB4 = ThrottleBT[4];
     }
-	
     Extender_raw[0] = MCP23X17_read(IO_DEVICE_1, MCP_GPIOA);
     Extender_raw[1] = MCP23X17_read(IO_DEVICE_1, MCP_GPIOB);
     Extender_raw[2] = MCP23X17_read(IO_DEVICE_2, MCP_GPIOA);
@@ -216,7 +223,8 @@ int main(void)
     Joystick_buffer[3] = Extender_data[0];
     Joystick_buffer[4] = Extender_data[1];
     Joystick_buffer[5] = Extender_data[2];
-    Joystick_buffer[6] = Extender_data[3];
+    Joystick_buffer[6] = (~ThrottleButtons & 0x0F) << 2 |	// insert 4 buttons from the throttle
+                         (Extender_data[3] & 0x03);
     USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, Joystick_buffer, 7);
     HAL_Delay(50);
   }
