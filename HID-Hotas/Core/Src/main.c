@@ -86,7 +86,7 @@ int expo(uint16_t probed2, uint16_t correction2)
   uint16_t result2;
   if (abs(x-2048) < 64)
   {
-	result2 = x/16;
+	result2 = 2048/16;
   }
   else
   {

@@ -1,31 +1,12 @@
 #include "MCP23X17.h"
-// #include <stdbool.h>
 
   bool protocol = 0;	//default SPI
 
   void setup_MCP23X17()
   {
-    // MCP23X17_write(IO_DEVICE_1, MCP_IOCONA, 0x38);      //Device Configutation
-    // MCP23X17_write(IO_DEVICE_1, MCP_IOCONB, 0x38);      //Device Configutation
-    // MCP23X17_write(IO_DEVICE_1, MCP_IODIRA, 0xFF);      //Set pins as inputs or outputs on side A
-    // MCP23X17_write(IO_DEVICE_1, MCP_IODIRB, 0xFF);      //Set pins as inputs or outputs on side B
-    // MCP23X17_write(IO_DEVICE_1, MCP_GPPUA, 0xFF);       //I/O pullup pin state on side A
-    // MCP23X17_write(IO_DEVICE_1, MCP_GPPUB, 0xFF);       //I/O pullup pin state on side B
-    // MCP23X17_write(IO_DEVICE_1, MCP_IPOLA, 0xFF);       //Signal polarity on side A
-    // MCP23X17_write(IO_DEVICE_1, MCP_IPOLB, 0xFF);       //Signal polarity on side B
-
-    // MCP23X17_write(IO_DEVICE_2, MCP_IOCONA, 0x38);      //Device Configutation
-    // MCP23X17_write(IO_DEVICE_2, MCP_IOCONB, 0x38);      //Device Configutation
-    // MCP23X17_write(IO_DEVICE_2, MCP_IODIRA, 0xFF);      //Set pins as inputs or outputs on side A
-    // MCP23X17_write(IO_DEVICE_2, MCP_IODIRB, 0xFF);      //Set pins as inputs or outputs on side B
-    // MCP23X17_write(IO_DEVICE_2, MCP_GPPUA, 0xFF);       //I/O pullup pin state on side A
-    // MCP23X17_write(IO_DEVICE_2, MCP_GPPUB, 0xFF);       //I/O pullup pin state on side B
-    // MCP23X17_write(IO_DEVICE_2, MCP_IPOLA, 0xFF);       //Signal polarity on side A
-    // MCP23X17_write(IO_DEVICE_2, MCP_IPOLB, 0xFF);       //Signal polarity on side B
-
     setup_MCP23S17();
     
-	//Tesr protocol
+	//Test protocol
     uint8_t select = 0;
 	HAL_Delay(1000);
     select = MCP23S17_read(IO_DEVICE_1, MCP_GPIOA);
